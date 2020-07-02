@@ -8,6 +8,10 @@
 
 import UIKit
 
+/// DEBUG
+import CloudKit
+import didicloud
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     

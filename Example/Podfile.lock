@@ -2,15 +2,15 @@ PODS:
   - didicloud (0.1.0)
 
 DEPENDENCIES:
-  - didicloud (from `/Users/rodrigofgiglio/Desktop/didicloud`)
+  - didicloud
 
-EXTERNAL SOURCES:
-  didicloud:
-    :path: "/Users/rodrigofgiglio/Desktop/didicloud"
+SPEC REPOS:
+  trunk:
+    - didicloud
 
 SPEC CHECKSUMS:
-  didicloud: ba486c380b5030b0f59245a59d218867788f85ca
+  didicloud: 7f9ee24999cd0d91df19d56a91005210f8dec4e2
 
-PODFILE CHECKSUM: 67da712f4d8ec49a288b00a94ae4372e3e4583d9
+PODFILE CHECKSUM: d8a677c84b99a0e1180cb405b13c06f2af93a981
 
 COCOAPODS: 1.9.1
