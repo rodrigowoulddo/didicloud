@@ -43,26 +43,25 @@ public class Storage {
         }
     }
     
-    public static func get<T: Storable>(privateData: Bool = true, recordID: CKRecord.ID, _ completion: @escaping (Result<[T], Error>) -> Void) {
+    public static func get<T: Storable>(privateData: Bool = true, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
         
-        let query = CKQuery(recordType: T.reference, predicate: NSPredicate(value: true))
         let storage = privateData ? privateStorage : publicStorage
         
-        storage.perform(query, inZoneWith: nil) {
-            results, error in
+        storage.fetch(withRecordID: recordID) {
+            result, error in
             
             if let error = error {
                 completion(.failure(error))
                 return
             }
             
-            guard let results = results else {
+            guard let result = result else {
                 completion(.failure(StorageError.cloudKitDataRetrieve))
                 return
             }
             
-            let values = results.map({ T.init($0) })
-            completion(.success(values))
+            let value = T.init(result)
+            completion(.success(value))
         }
     }
     
