@@ -1,0 +1,16 @@
+PODS:
+  - didicloud (0.1.0)
+
+DEPENDENCIES:
+  - didicloud (from `/Users/rodrigofgiglio/Desktop/didicloud`)
+
+EXTERNAL SOURCES:
+  didicloud:
+    :path: "/Users/rodrigofgiglio/Desktop/didicloud"
+
+SPEC CHECKSUMS:
+  didicloud: ba486c380b5030b0f59245a59d218867788f85ca
+
+PODFILE CHECKSUM: 67da712f4d8ec49a288b00a94ae4372e3e4583d9
+
+COCOAPODS: 1.9.1

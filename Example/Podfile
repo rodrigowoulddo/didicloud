@@ -1,0 +1,22 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '13.0'
+
+target 'Didicloud-Example' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  pod 'didicloud', :path => '/Users/rodrigofgiglio/Desktop/didicloud'
+
+  target 'Didicloud-ExampleTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end
+
+post_install do |installer|
+    text = File.read("Pods/Target Support Files/Pods-Didicloud-example/Pods-Didicloud-Example-frameworks.sh")
+    new_contents = text.gsub(/'\$1'/, "\\\"$1\\\"")
+
+    File.open("Pods/Target Support Files/Pods-Didicloud-example/Pods-Didicloud-Example-frameworks.sh", "w") {|file| file.puts new_contents}
+end
