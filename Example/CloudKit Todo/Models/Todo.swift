@@ -20,7 +20,6 @@ class Todo: Storable {
     /// Custom atributes
     var name: String
     var description: String?
-    var timeSpent: Int64
     
     /// Storable init
     required init(_ record: CKRecord) {
@@ -29,14 +28,11 @@ class Todo: Storable {
         self.id = record.recordID
         self.name = record["name"] as! String
         self.description = record["description"] as? String
-        self.timeSpent = record["timeSpent"] as! Int64
     }
     
     /// Custom init
     init(name: String, description: String?) {
         self.name = name
         self.description = description
-        self.timeSpent = 0
     }
-    
 }
