@@ -7,6 +7,8 @@
 didcloud makes CloudKit operations easier and less verbose.
 
 ## Examples
+
+### Models
 The classes you will persist as resources on CloudKit must conform with the `Storable` protocol, as the example shows:
 ```swift
 import Foundation
@@ -40,7 +42,7 @@ class Todo: Storable {
     }
 }
 ```
-
+### CRUD Operations
 And a **request** for the list of objects can be done this way:
 ```swift
         Storage.getAll() {
@@ -112,6 +114,18 @@ The **deletion** of a resource can be done this way:
             }
         }
 ```
+
+### Public and Private Databases
+
+You can specify if the operation occurs in the private or public CloudKit database. It can be done this way:
+
+```swift
+    Storage.getAll(storageType: .publicStorage) { 
+        // ... 
+    }
+```
+
+All CRUD methods accept the `storageType` option and the default value is `.privateStorage`.
 
 ## Example Project
 
