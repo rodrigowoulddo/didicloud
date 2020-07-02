@@ -1,8 +1,7 @@
 # didicloud
 
-[![CI Status](https://img.shields.io/travis/rodrigofgiglio@gmail.com/didicloud.svg?style=flat)](https://travis-ci.org/rodrigofgiglio@gmail.com/didicloud)
 [![Version](https://img.shields.io/cocoapods/v/didicloud.svg?style=flat)](https://cocoapods.org/pods/didicloud)
-[![License](https://img.shields.io/cocoapods/l/didicloud.svg?style=flat)](https://cocoapods.org/pods/didicloud)
+[![License](https://img.shields.io/cocoapods/l/didicloud.svg)](https://cocoapods.org/pods/didicloud)
 [![Platform](https://img.shields.io/cocoapods/p/didicloud.svg?style=flat)](https://cocoapods.org/pods/didicloud)
 
 didcloud makes CloudKit operations easier and less verbose.
