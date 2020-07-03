@@ -17,10 +17,8 @@ import didicloud
 
 class Todo: Storable {
     
-    /// Storable atributes
-    public static let reference = "Todo"
-    var record: CKRecord?
-    var id: CKRecord.ID?
+    /// CloudKit resource name
+    public class override var reference: String { return "Todo" }
     
     /// Custom atributes
     var name: String
@@ -28,17 +26,17 @@ class Todo: Storable {
     
     /// Storable init
     required init(_ record: CKRecord) {
-        
-        self.record = record
-        self.id = record.recordID
+
         self.name = record["name"] as! String
         self.description = record["description"] as? String
+        super.init(record)
     }
     
     /// Custom init
     init(name: String, description: String?) {
         self.name = name
         self.description = description
+        super.init()
     }
 }
 ```
