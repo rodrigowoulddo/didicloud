@@ -9,32 +9,28 @@
 import Foundation
 import CloudKit
 
-public class Storage {
+public struct Storage {
     
-    private static let forbidenAttributes = ["id","record"]
-    
-    private static let privateStorage = CKContainer.default().privateCloudDatabase
-    private static let publicStorage = CKContainer.default().publicCloudDatabase
+    private static let forbidenAttributes = ["id", "record"]
     
     public static func id(_ name: String) -> CKRecord.ID {
         return CKRecord.ID(recordName: name)
     }
-
-    public static func getAll<T: Storable>(privateData: Bool = true, _ completion: @escaping (Result<[T], Error>) -> Void) {
+    
+    public static func getAll<T: Storable>(storageType: StorageType = .privateStorage, _ completion: @escaping (Result<[T], Error>) -> Void) {
         
         let query = CKQuery(recordType: T.reference, predicate: NSPredicate(value: true))
-        let storage = privateData ? privateStorage : publicStorage
         
-        storage.perform(query, inZoneWith: nil) {
+        storageType.database.perform(query, inZoneWith: nil) {
             results, error in
             
-            if let error = error {
-                completion(.failure(error))
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataRetrieval))
                 return
             }
             
             guard let results = results else {
-                completion(.failure(StorageError.cloudKitDataRetrieve))
+                completion(.failure(StorageError.cloudKitNullReturn))
                 return
             }
             
@@ -43,20 +39,18 @@ public class Storage {
         }
     }
     
-    public static func get<T: Storable>(privateData: Bool = true, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
-        
-        let storage = privateData ? privateStorage : publicStorage
-        
-        storage.fetch(withRecordID: recordID) {
+    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
+                
+        storageType.database.fetch(withRecordID: recordID) {
             result, error in
             
-            if let error = error {
-                completion(.failure(error))
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataRetrieval))
                 return
             }
             
             guard let result = result else {
-                completion(.failure(StorageError.cloudKitDataRetrieve))
+                completion(.failure(StorageError.cloudKitNullReturn))
                 return
             }
             
@@ -65,26 +59,27 @@ public class Storage {
         }
     }
     
-    public static func create<T: Storable>(privateData: Bool = true, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         let record = CKRecord(recordType: T.reference)
         
         for child in Mirror(reflecting: storable).children {
-            if let key = child.label {
-                if !forbidenAttributes.contains(key)  {
-                    record.setValue(child.value, forKey: key)
-                }
+            if let key = child.label,
+                !forbidenAttributes.contains(key)  {
+                record.setValue(child.value, forKey: key)
             }
         }
-        
-        let storage = privateData ? privateStorage : publicStorage
-        
-        storage.save(record) {
+                
+        storageType.database.save(record) {
             (savedRecord, error) in
             
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataInsertion))
+                return
+            }
+            
             guard let savedRecord = savedRecord else {
-                
-                completion(.failure(StorageError.cloudKitDataRetrieve))
+                completion(.failure(StorageError.cloudKitNullReturn))
                 return
             }
             
@@ -92,29 +87,30 @@ public class Storage {
         }
     }
     
-    public static func update<T: Storable>(privateData: Bool = true, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = storable.record else {
-            completion(.failure(StorageError.cloudKitDataRemoval))
+            completion(.failure(StorageError.cloudKitNullRecord))
             return
         }
         
         for child in Mirror(reflecting: storable).children {
-            if let key = child.label {
-                if !forbidenAttributes.contains(key)  {
-                    record.setValue(child.value, forKey: key)
-                }
+            if let key = child.label,
+                !forbidenAttributes.contains(key)  {
+                record.setValue(child.value, forKey: key)
             }
         }
-        
-        let storage = privateData ? privateStorage : publicStorage
-        
-        storage.save(record) {
+                
+        storageType.database.save(record) {
             (savedRecord, error) in
             
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataUpdate))
+                return
+            }
+            
             guard let savedRecord = savedRecord else {
-                
-                completion(.failure(StorageError.cloudKitDataRetrieve))
+                completion(.failure(StorageError.cloudKitDataRetrieval))
                 return
             }
             
@@ -122,22 +118,20 @@ public class Storage {
         }
     }
     
-    public static func remove(privateData: Bool = true, _ recordID: String, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
-
-        let recordID = CKRecord.ID(recordName: recordID)
+    public static func remove(storageType: StorageType = .privateStorage, _ recordID: String, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
         
-        let storage = privateData ? privateStorage : publicStorage
-
-        storage.delete(withRecordID: recordID) {
+        let recordID = CKRecord.ID(recordName: recordID)
+                
+        storageType.database.delete(withRecordID: recordID) {
             (recordID, error) in
             
-            if let error = error {
-                completion(.failure(error))
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataRemoval))
                 return
             }
             
             guard let recordID = recordID else {
-                completion(.failure(StorageError.cloudKitDataRemoval))
+                completion(.failure(StorageError.cloudKitNullReturn))
                 return
             }
             
