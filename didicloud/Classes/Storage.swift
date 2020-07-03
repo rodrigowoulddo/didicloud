@@ -12,7 +12,7 @@ import CloudKit
 public struct Storage {
     
     private static let forbidenAttributes = ["id", "record"]
-    
+
     public static func id(_ name: String) -> CKRecord.ID {
         return CKRecord.ID(recordName: name)
     }
@@ -34,12 +34,13 @@ public struct Storage {
                 return
             }
             
+            
             let values = results.map({ T.init($0) })
             completion(.success(values))
         }
     }
     
-    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
+    public static func get<T: StorableProtocol>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
                 
         storageType.database.fetch(withRecordID: recordID) {
             result, error in
@@ -59,7 +60,7 @@ public struct Storage {
         }
     }
     
-    public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func create<T: StorableProtocol>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         let record = CKRecord(recordType: T.reference)
         
@@ -87,7 +88,7 @@ public struct Storage {
         }
     }
     
-    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func update<T: StorableProtocol>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = storable.record else {
             completion(.failure(StorageError.cloudKitNullRecord))
