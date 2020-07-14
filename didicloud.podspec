@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'didicloud'
-  s.version          = '0.1.14'
+  s.version          = '0.2.0'
   s.summary          = 'An abstraction for CloudKit operations'
 
   s.swift_versions   = '5.0'
@@ -42,5 +42,5 @@ didicloud is an abstraction for CloudKit that make CRUD operations easier and le
   # s.frameworks = 'UIKit', 'MapKit'
   
   # Dependencies
-  s.dependency 'EVReflection/CloudKit', '~> 5.10'
+  # s.dependency 'EVReflection/CloudKit', '~> 5.10'
 end
