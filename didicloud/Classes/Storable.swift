@@ -8,25 +8,15 @@
 
 import Foundation
 import CloudKit
+import EVReflection
 
-public protocol StorableProtocol {
+public protocol Referenciable {
     static var reference: String { get }
-    var record: CKRecord? { get }
-    var id: CKRecord.ID? { get }
-    init(_ record: CKRecord)
 }
 
-open class Storable: StorableProtocol {
+public typealias CKObject = CKDataObject
+
+public protocol Storable: Referenciable & CKObject {
     
-    open class var reference: String { return "StorableObject" }
-    public var record: CKRecord?
-    public var id: CKRecord.ID?
-        
-    public required init(_ record: CKRecord) {
-        
-        self.record = record
-        self.id = record.recordID
-    }
-        
-    public init() { }
 }
+

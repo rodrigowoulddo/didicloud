@@ -32,15 +32,17 @@ class CreateViewController: UIViewController {
         guard let todo = self.todo else { return }
         
         nameTextField.text = todo.name
-        descriptionTextField.text = todo.description
+        descriptionTextField.text = todo.simpleDescription
         
     }
     
     // MARK: - Storage
     private func createTodo(name: String, description: String?) {
         
-        let newTodo = Todo(name: name, description: description)
-        
+        let newTodo = Todo()
+        newTodo.name = name
+        newTodo.simpleDescription = description
+
         saveActivityIndicator.isHidden = false
         Storage.create(newTodo) {
             result in
@@ -64,7 +66,7 @@ class CreateViewController: UIViewController {
     private func updateTodo(_ todo: Todo, name: String, description: String?) {
         
         todo.name = name
-        todo.description = description
+        todo.simpleDescription = description
         
         saveActivityIndicator.isHidden = false
         Storage.update(todo) {

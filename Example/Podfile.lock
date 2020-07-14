@@ -1,16 +1,25 @@
 PODS:
-  - didicloud (0.1.0)
+  - didicloud (0.1.10):
+    - EVReflection/CloudKit (~> 5.10)
+  - EVReflection/CloudKit (5.10.1):
+    - EVReflection/Core
+  - EVReflection/Core (5.10.1)
 
 DEPENDENCIES:
-  - didicloud
+  - didicloud (from `../`)
 
 SPEC REPOS:
   trunk:
-    - didicloud
+    - EVReflection
+
+EXTERNAL SOURCES:
+  didicloud:
+    :path: "../"
 
 SPEC CHECKSUMS:
-  didicloud: 7f9ee24999cd0d91df19d56a91005210f8dec4e2
+  didicloud: f5c8b94966b3d83f1eecebbb6ef60fad499ab3f3
+  EVReflection: 8124de482178d34ccd56473e16cd95990f9a1113
 
-PODFILE CHECKSUM: d8a677c84b99a0e1180cb405b13c06f2af93a981
+PODFILE CHECKSUM: 30cdb5ee355a1a1107fbcaf7c3386ed542c06f94
 
 COCOAPODS: 1.9.3

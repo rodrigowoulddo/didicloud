@@ -97,7 +97,7 @@ public struct Storage {
         }
     }
     
-    public static func get<T: StorableProtocol>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
+    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
                 
         storageType.database.fetch(withRecordID: recordID) {
             result, error in
@@ -117,16 +117,9 @@ public struct Storage {
         }
     }
     
-    public static func create<T: StorableProtocol>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
-        let record = CKRecord(recordType: T.reference)
-        
-        for child in Mirror(reflecting: storable).children {
-            if let key = child.label,
-                !forbidenAttributes.contains(key)  {
-                record.setValue(child.value, forKey: key)
-            }
-        }
+        let record = storable.toCKRecord()
                 
         storageType.database.save(record) {
             (savedRecord, error) in
@@ -145,19 +138,16 @@ public struct Storage {
         }
     }
     
-    public static func update<T: StorableProtocol>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
-        guard let record = storable.record else {
-            completion(.failure(StorageError.cloudKitNullRecord))
-            return
-        }
+        let record = storable.toCKRecord()
         
-        for child in Mirror(reflecting: storable).children {
-            if let key = child.label,
-                !forbidenAttributes.contains(key)  {
-                record.setValue(child.value, forKey: key)
-            }
-        }
+//        for child in Mirror(reflecting: storable).children {
+//            if let key = child.label,
+//                !forbidenAttributes.contains(key)  {
+//                record.setValue(child.value, forKey: key)
+//            }
+//        }
                 
         storageType.database.save(record) {
             (savedRecord, error) in
@@ -176,9 +166,7 @@ public struct Storage {
         }
     }
     
-    public static func remove(storageType: StorageType = .privateStorage, _ recordID: String, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
-        
-        let recordID = CKRecord.ID(recordName: recordID)
+    public static func remove(storageType: StorageType = .privateStorage, _ recordID: CKRecord.ID, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
                 
         storageType.database.delete(withRecordID: recordID) {
             (recordID, error) in

@@ -40,5 +40,7 @@ didicloud is an abstraction for CloudKit that make CRUD operations easier and le
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  
+  # Dependencies
+  s.dependency 'EVReflection/CloudKit', '~> 5.10'
 end

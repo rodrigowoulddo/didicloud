@@ -10,26 +10,12 @@ import Foundation
 import CloudKit
 import didicloud
 
-class Todo: Storable {
+class Todo: CKObject, Storable {
     
-    public class override var reference: String { return "Todo" }
+    static var reference: String = "Todo"
     
     /// Custom atributes
-    var name: String
-    var description: String?
-    
-    /// Storable init
-    required init(_ record: CKRecord) {
+    var name: String = ""
+    var simpleDescription: String?
 
-        self.name = record["name"] as! String
-        self.description = record["description"] as? String
-        super.init(record)
-    }
-    
-    /// Custom init
-    init(name: String, description: String?) {
-        self.name = name
-        self.description = description
-        super.init()
-    }
 }

@@ -8,6 +8,7 @@
 
 import UIKit
 import didicloud
+import CloudKit
 
 class MasterViewController: UITableViewController {
     
@@ -61,7 +62,7 @@ class MasterViewController: UITableViewController {
         }
     }
     
-    private func completeTodo(withId id: String) {
+    private func completeTodo(withId id: CKRecord.ID) {
         
         Storage.remove(id) {
             result in
@@ -108,7 +109,7 @@ class MasterViewController: UITableViewController {
         
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
         cell.textLabel?.text = todo.name
-        cell.detailTextLabel?.text = todo.description
+        cell.detailTextLabel?.text = todo.simpleDescription
         
         return cell
     }
@@ -120,8 +121,8 @@ class MasterViewController: UITableViewController {
         let complete = UIContextualAction(style: .normal, title: "Complete", handler: {
             (action, view, completionHandler) in
             
-            guard let id = self.todos[indexPath.row].id?.recordName else { return }
-            self.todos = self.todos.filter({ $0.id?.recordName != id })
+            let id = self.todos[indexPath.row].recordID
+            self.todos = self.todos.filter({ $0.recordID != id })
             
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
             self.completeTodo(withId: id)
