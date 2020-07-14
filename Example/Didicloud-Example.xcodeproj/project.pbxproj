@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7332BFF597AC40D624B93181 /* Pods_Didicloud_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB0FFCC14BFA540323C04CEE /* Pods_Didicloud_Example.framework */; };
+		752E1F4324BE5FA60068F908 /* TodoParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752E1F4224BE5FA60068F908 /* TodoParser.swift */; };
 		753268C368ECDEC699C0DB87 /* Pods_Didicloud_ExampleTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FED2AC6379475974476E04D /* Pods_Didicloud_ExampleTests.framework */; };
 		7533BE5F24A9602C003EBE27 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7533BE5E24A9602C003EBE27 /* AppDelegate.swift */; };
 		7533BE6124A9602C003EBE27 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7533BE6024A9602C003EBE27 /* SceneDelegate.swift */; };
@@ -38,6 +39,7 @@
 		346C2AED39B4588BC7C66BE2 /* Pods-CloudKit Todo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CloudKit Todo.release.xcconfig"; path = "Target Support Files/Pods-CloudKit Todo/Pods-CloudKit Todo.release.xcconfig"; sourceTree = "<group>"; };
 		67B655746D92F15C5113BFBF /* Pods-Didicloud-ExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Didicloud-ExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-Didicloud-ExampleTests/Pods-Didicloud-ExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		6FED2AC6379475974476E04D /* Pods_Didicloud_ExampleTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Didicloud_ExampleTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		752E1F4224BE5FA60068F908 /* TodoParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoParser.swift; sourceTree = "<group>"; };
 		7533BE5B24A9602C003EBE27 /* Todo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Todo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7533BE5E24A9602C003EBE27 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7533BE6024A9602C003EBE27 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				755408B524A963E200B18DEC /* Todo.swift */,
+				752E1F4224BE5FA60068F908 /* TodoParser.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -363,6 +366,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75E47DE024A99B4400FD59B4 /* CreateViewController.swift in Sources */,
+				752E1F4324BE5FA60068F908 /* TodoParser.swift in Sources */,
 				7533BE5F24A9602C003EBE27 /* AppDelegate.swift in Sources */,
 				7533BE6124A9602C003EBE27 /* SceneDelegate.swift in Sources */,
 				7533BE6324A9602C003EBE27 /* MasterViewController.swift in Sources */,

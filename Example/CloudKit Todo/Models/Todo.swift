@@ -10,12 +10,18 @@ import Foundation
 import CloudKit
 import didicloud
 
-class Todo: CKObject, Storable {
+struct Todo: Storable {
     
+    /// Static attributes
     static var reference: String = "Todo"
+    static var parser: Parser = TodoParser()
     
-    /// Custom atributes
-    var name: String = ""
+    /// Storable attributes
+    var recordID: CKRecord.ID
+    var creatorUserRecordID: CKRecord.ID?
+    
+    /// Custom attributes
+    var name: String
     var simpleDescription: String?
 
 }

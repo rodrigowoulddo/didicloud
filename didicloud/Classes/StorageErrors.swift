@@ -17,7 +17,8 @@ public enum StorageError: LocalizedError {
     case cloudKitNullReference
     case cloudKitNullRecord
     case cloudKitNullReturn
-    
+    case parsingFailure
+
     public var errorDescription: String? {
         switch self {
         case .cloudKitDataRetrieval: return NSLocalizedString("Could not retrieve data from storage.", comment: "Error")
@@ -27,6 +28,7 @@ public enum StorageError: LocalizedError {
         case .cloudKitNullReference: return NSLocalizedString("Could not work with a null resource ID.", comment: "Error")
         case .cloudKitNullRecord: return NSLocalizedString("Could not work with a null record.", comment: "Error")
         case .cloudKitNullReturn: return NSLocalizedString("Storage returned null for the operation.", comment: "Error")
+        case .parsingFailure: return NSLocalizedString("Could not parse CKRecord to object.", comment: "Error")
         }
     }
 }

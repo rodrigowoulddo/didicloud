@@ -13,8 +13,8 @@ public struct Storage {
     
     private static let forbidenAttributes = ["id", "record"]
 
-    public static func id(_ name: String) -> CKRecord.ID {
-        return CKRecord.ID(recordName: name)
+    public static func newID() -> CKRecord.ID {
+        return CKRecord.ID(recordName: UUID().uuidString)
     }
     
     /// Returns the current user icloud ID
@@ -65,9 +65,18 @@ public struct Storage {
                         return
                     }
                     
-                    let values = results.map({ T.init($0) })
+                    var values: [T] = []
+                    for record in results {
+                        guard let value = try? T.parser.fromRecord(record) as? T else {
+                            completion(.failure(StorageError.parsingFailure))
+                            return
+                        }
+                        values.append(value)
+                    }
+                    
                     completion(.success(values))
                 }
+                
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -92,7 +101,15 @@ public struct Storage {
             }
             
             
-            let values = results.map({ T.init($0) })
+            var values: [T] = []
+            for record in results {
+                guard let value = try? T.parser.fromRecord(record) as? T else {
+                    completion(.failure(StorageError.parsingFailure))
+                    return
+                }
+                values.append(value)
+            }
+            
             completion(.success(values))
         }
     }
@@ -107,19 +124,25 @@ public struct Storage {
                 return
             }
             
-            guard let result = result else {
+            guard let record = result else {
                 completion(.failure(StorageError.cloudKitNullReturn))
                 return
             }
             
-            let value = T.init(result)
+            guard let value = try? T.parser.fromRecord(record) as? T else {
+                completion(.failure(StorageError.parsingFailure))
+                return
+            }
+            
             completion(.success(value))
         }
     }
     
     public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
-        let record = storable.toCKRecord()
+        guard let record = try? T.parser.toRecord(storable) else {
+            return completion(.failure(StorageError.parsingFailure))
+        }
                 
         storageType.database.save(record) {
             (savedRecord, error) in
@@ -134,21 +157,21 @@ public struct Storage {
                 return
             }
             
-            completion(.success(T.init(savedRecord)))
+            guard let value = try? T.parser.fromRecord(savedRecord) as? T else {
+                completion(.failure(StorageError.parsingFailure))
+                return
+            }
+            
+            completion(.success(value))
         }
     }
     
     public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
-        let record = storable.toCKRecord()
+        guard let record = try? T.parser.toRecord(storable) else {
+            return completion(.failure(StorageError.parsingFailure))
+        }
         
-//        for child in Mirror(reflecting: storable).children {
-//            if let key = child.label,
-//                !forbidenAttributes.contains(key)  {
-//                record.setValue(child.value, forKey: key)
-//            }
-//        }
-                
         storageType.database.save(record) {
             (savedRecord, error) in
             
@@ -162,7 +185,12 @@ public struct Storage {
                 return
             }
             
-            completion(.success(T.init(savedRecord)))
+            guard let value = try? T.parser.fromRecord(savedRecord) as? T else {
+                completion(.failure(StorageError.parsingFailure))
+                return
+            }
+            
+            completion(.success(value))
         }
     }
     
