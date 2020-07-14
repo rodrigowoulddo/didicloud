@@ -1,5 +1,5 @@
 PODS:
-  - didicloud (0.1.10):
+  - didicloud (0.1.12):
     - EVReflection/CloudKit (~> 5.10)
   - EVReflection/CloudKit (5.10.1):
     - EVReflection/Core
@@ -17,7 +17,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  didicloud: f5c8b94966b3d83f1eecebbb6ef60fad499ab3f3
+  didicloud: e5a892d30dfd04db32760b07f8cafc844d51d465
   EVReflection: 8124de482178d34ccd56473e16cd95990f9a1113
 
 PODFILE CHECKSUM: 30cdb5ee355a1a1107fbcaf7c3386ed542c06f94
