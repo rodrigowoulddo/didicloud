@@ -28,7 +28,7 @@ open class CKObject: CKDataObject {
         self.recordChangeTag = record.recordChangeTag
         
         let data = NSMutableData()
-        let coder = NSKeyedArchiver(forWritingWith: data)
+        let coder = NSKeyedArchiver(requiringSecureCoding: false)
         record.encodeSystemFields(with: coder)
         coder.finishEncoding()
         self.encodedSystemFields = data as Data
