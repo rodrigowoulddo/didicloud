@@ -37,7 +37,6 @@ public struct Storage {
         }
     }
     
-    
     /// Fetch all records of T owned by current user
     /// - Parameters:
     ///   - storageType: Which database to perform the query
@@ -83,6 +82,10 @@ public struct Storage {
         }
     }
     
+    /// Fetch all records of T
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - completion: Result object containing all fetched records or an error
     public static func getAll<T: Storable>(storageType: StorageType = .privateStorage, _ completion: @escaping (Result<[T], Error>) -> Void) {
         
         let query = CKQuery(recordType: T.reference, predicate: NSPredicate(value: true))
@@ -114,6 +117,11 @@ public struct Storage {
         }
     }
     
+    /// Fetch the record with the ID
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - recordID: The UUID of the record in the database
+    ///   - completion: Result object containing the fetched record or an error
     public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
                 
         storageType.database.fetch(withRecordID: recordID) {
@@ -138,6 +146,11 @@ public struct Storage {
         }
     }
     
+    /// Create a record in the database
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - storable: The Storable object to  e inserted
+    ///   - completion: Result object containing the created record  or an error
     public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
@@ -166,6 +179,11 @@ public struct Storage {
         }
     }
     
+    /// Updates a record in the database
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - storable: The Storable object to  e updated
+    ///   - completion: Result object containing the updated record or an error
     public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
@@ -194,6 +212,11 @@ public struct Storage {
         }
     }
     
+    /// Removes a record from the database
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - recordID: The UUID of the record in the database
+    ///   - completion: Result object the deleted record ID or an error
     public static func remove(storageType: StorageType = .privateStorage, _ recordID: CKRecord.ID, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
                 
         storageType.database.delete(withRecordID: recordID) {

@@ -39,7 +39,7 @@ class CreateViewController: UIViewController {
     // MARK: - Storage
     private func createTodo(name: String, description: String?) {
         
-        let newTodo = Todo(recordID: Storage.newID(), creatorUserRecordID: nil, name: name, simpleDescription: description)
+        let newTodo = Todo(name: name, simpleDescription: description)
 
         saveActivityIndicator.isHidden = false
         Storage.create(newTodo) {
@@ -63,7 +63,7 @@ class CreateViewController: UIViewController {
     
     private func updateTodo(_ todo: Todo, name: String, description: String?) {
         
-        let todoToUpdate = Todo(recordID: todo.recordID, creatorUserRecordID: nil, name: name, simpleDescription: description)
+        let todoToUpdate = Todo(name: name, simpleDescription: description)
         
         saveActivityIndicator.isHidden = false
         Storage.update(todoToUpdate) {

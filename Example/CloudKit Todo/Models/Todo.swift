@@ -17,8 +17,7 @@ struct Todo: Storable {
     static var parser: Parser = TodoParser()
     
     /// Storable attributes
-    var recordID: CKRecord.ID
-    var creatorUserRecordID: CKRecord.ID?
+    var recordID: CKRecord.ID?
     
     /// Custom attributes
     var name: String

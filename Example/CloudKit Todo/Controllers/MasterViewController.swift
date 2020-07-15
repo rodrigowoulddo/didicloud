@@ -121,7 +121,7 @@ class MasterViewController: UITableViewController {
         let complete = UIContextualAction(style: .normal, title: "Complete", handler: {
             (action, view, completionHandler) in
             
-            let id = self.todos[indexPath.row].recordID
+            guard let id = self.todos[indexPath.row].recordID else { return }
             self.todos = self.todos.filter({ $0.recordID != id })
             
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
