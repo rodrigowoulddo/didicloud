@@ -1,5 +1,5 @@
 PODS:
-  - didicloud (0.2.0)
+  - didicloud (0.2.1)
 
 DEPENDENCIES:
   - didicloud (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  didicloud: ca2d0825bc5590db3dcb80a8378abb27c8e042af
+  didicloud: c429b37ab6fe6a819adfa47cfa4f0f63fcc68c22
 
 PODFILE CHECKSUM: 30cdb5ee355a1a1107fbcaf7c3386ed542c06f94
 
