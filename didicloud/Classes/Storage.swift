@@ -236,11 +236,11 @@ public struct Storage {
         }
     }
     
-    /// Removes a record from the database
+    /// Removes all records of type T
     /// - Parameters:
     ///   - storageType: Which database to perform the query
-    ///   - recordID: The UUID of the record in the database
-    ///   - completion: Result object the deleted record ID or an error
+    ///   - type: The type of the record
+    ///   - completion: Result object the deleted record ID's or an error
     public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
         
         getAll {
@@ -265,7 +265,7 @@ public struct Storage {
                         return
                     }
                     
-                    remove(recordID) {
+                    remove(storageType: storageType, recordID) {
                         (result: Result<CKRecord.ID, Error>) in
                         
                         switch result {
@@ -285,6 +285,72 @@ public struct Storage {
                 dispatchGroup.notify(queue: .main) {
                     completion(.success(deletedIDs))
                 }
+            }
+        }
+    }
+    
+    /// Removes all records of type T owned by current user
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - type: The type of the record
+    ///   - completion: Result object the deleted record ID's or an error
+    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+        
+        getUserRecordID { (result) in
+            
+            switch result {
+           
+            case .success(let recordID):
+               
+                let query = CKQuery(
+                    recordType: T.reference,
+                    predicate: NSPredicate(format: "creatorUserRecordID == %@", recordID)
+                )
+                
+                storageType.database.perform(query, inZoneWith: nil) {
+                    results, error in
+                    
+                    if error != nil {
+                        completion(.failure(StorageError.cloudKitDataRetrieval))
+                        return
+                    }
+                    
+                    guard let results = results else {
+                        completion(.failure(StorageError.cloudKitNullReturn))
+                        return
+                    }
+                    
+                    var deletedIDs: [CKRecord.ID] = []
+                    let dispatchGroup = DispatchGroup()
+                    
+                    for value in results {
+                        
+                        dispatchGroup.enter()
+                        
+                        remove(storageType: storageType, value.recordID) {
+                            (result: Result<CKRecord.ID, Error>) in
+                            
+                            switch result {
+                                
+                            case .failure(_):
+                                completion(.failure(StorageError.cloudKitDataRemoval))
+                                return
+                            
+                            case .success(let recordID):
+                                deletedIDs.append(recordID)
+                                dispatchGroup.leave()
+                                
+                            }
+                        }
+                    }
+                    
+                    dispatchGroup.notify(queue: .main) {
+                        completion(.success(deletedIDs))
+                    }
+                }
+                
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
