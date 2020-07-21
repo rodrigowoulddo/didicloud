@@ -271,8 +271,7 @@ public struct Storage {
     ///   - completion: Result object the deleted record ID's or an error
     public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
         
-        getAll {
-            (result: Result<[T], Error>) in
+        getAll { (result: Result<[T], Error>) in
             
             switch result {
                 
@@ -281,37 +280,22 @@ public struct Storage {
                 
             case .success(let values):
                 
-                var deletedIDs: [CKRecord.ID] = []
-                let dispatchGroup = DispatchGroup()
-                
-                for value in values {
-                    
-                    dispatchGroup.enter()
-                    
-                    guard let recordID = value.recordID else {
-                        completion(.failure(StorageError.cloudKitNullReference))
-                        return
-                    }
-                    
-                    remove(storageType: storageType, recordID) {
-                        (result: Result<CKRecord.ID, Error>) in
-                        
-                        switch result {
-                            
-                        case .failure(_):
-                            completion(.failure(StorageError.cloudKitDataRemoval))
-                            return
-                        
-                        case .success(let recordID):
-                            deletedIDs.append(recordID)
-                            dispatchGroup.leave()
-                            
-                        }
-                    }
+                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
+                    completion(.failure(StorageError.cloudKitNullRecord))
+                    return
                 }
                 
-                dispatchGroup.notify(queue: .main) {
-                    completion(.success(deletedIDs))
+                remove(recordIDs) {
+                    result in
+                    
+                    switch result {
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    case .success(let recordIDs):
+                        completion(.success(recordIDs))
+                    }
                 }
             }
         }
