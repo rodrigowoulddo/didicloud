@@ -271,7 +271,7 @@ public struct Storage {
     ///   - completion: Result object the deleted record ID's or an error
     public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
         
-        getAll { (result: Result<[T], Error>) in
+        getAll(storageType: storageType) { (result: Result<[T], Error>) in
             
             switch result {
                 
