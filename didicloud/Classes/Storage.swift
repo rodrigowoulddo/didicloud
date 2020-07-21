@@ -285,7 +285,7 @@ public struct Storage {
                     return
                 }
                 
-                remove(recordIDs) {
+                remove(storageType:storageType, recordIDs) {
                     result in
                     
                     switch result {
@@ -308,61 +308,32 @@ public struct Storage {
     ///   - completion: Result object the deleted record ID's or an error
     public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
         
-        getUserRecordID { (result) in
+        fetchRecordsByUser { (result: Result<[T], Error>) in
             
             switch result {
-           
-            case .success(let recordID):
-               
-                let query = CKQuery(
-                    recordType: T.reference,
-                    predicate: NSPredicate(format: "creatorUserRecordID == %@", recordID)
-                )
-                
-                storageType.database.perform(query, inZoneWith: nil) {
-                    results, error in
-                    
-                    if error != nil {
-                        completion(.failure(StorageError.cloudKitDataRetrieval))
-                        return
-                    }
-                    
-                    guard let results = results else {
-                        completion(.failure(StorageError.cloudKitNullReturn))
-                        return
-                    }
-                    
-                    var deletedIDs: [CKRecord.ID] = []
-                    let dispatchGroup = DispatchGroup()
-                    
-                    for value in results {
-                        
-                        dispatchGroup.enter()
-                        
-                        remove(storageType: storageType, value.recordID) {
-                            (result: Result<CKRecord.ID, Error>) in
-                            
-                            switch result {
-                                
-                            case .failure(_):
-                                completion(.failure(StorageError.cloudKitDataRemoval))
-                                return
-                            
-                            case .success(let recordID):
-                                deletedIDs.append(recordID)
-                                dispatchGroup.leave()
-                                
-                            }
-                        }
-                    }
-                    
-                    dispatchGroup.notify(queue: .main) {
-                        completion(.success(deletedIDs))
-                    }
-                }
                 
             case .failure(let error):
                 completion(.failure(error))
+                
+            case .success(let values):
+                
+                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
+                    completion(.failure(StorageError.cloudKitNullRecord))
+                    return
+                }
+                
+                remove(storageType:storageType, recordIDs) {
+                    result in
+                    
+                    switch result {
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    case .success(let recordIDs):
+                        completion(.success(recordIDs))
+                    }
+                }
             }
         }
     }
