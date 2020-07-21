@@ -6,6 +6,8 @@
 
 didcloud makes CloudKit operations easier and less verbose.
 
+## **[OUTDATED]**
+
 ## Examples
 
 ### Models
