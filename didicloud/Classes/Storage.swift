@@ -235,4 +235,106 @@ public struct Storage {
             completion(.success(recordID))
         }
     }
+    
+    /// Removes multiple records from the database
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - recordIDs: The UUID's in the database
+    ///   - completion: Result object the deleted record ID's or an error
+    public static func remove(storageType: StorageType = .privateStorage, _ recordIDs: [CKRecord.ID], completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+        
+        let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
+        
+        operation.modifyRecordsCompletionBlock = {
+            (_, deletedRecordIDs, error) in
+            
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataRemoval))
+                return
+            }
+            
+            guard let recordIDs = deletedRecordIDs else {
+                completion(.failure(StorageError.cloudKitNullReturn))
+                return
+            }
+            
+            completion(.success(recordIDs))
+        }
+        
+        storageType.database.add(operation)
+    }
+    
+    /// Removes all records of type T
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - type: The type of the record
+    ///   - completion: Result object the deleted record ID's or an error
+    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+        
+        getAll { (result: Result<[T], Error>) in
+            
+            switch result {
+                
+            case .failure(let error):
+                completion(.failure(error))
+                
+            case .success(let values):
+                
+                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
+                    completion(.failure(StorageError.cloudKitNullRecord))
+                    return
+                }
+                
+                remove(storageType:storageType, recordIDs) {
+                    result in
+                    
+                    switch result {
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    case .success(let recordIDs):
+                        completion(.success(recordIDs))
+                    }
+                }
+            }
+        }
+    }
+    
+    /// Removes all records of type T owned by current user
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - type: The type of the record
+    ///   - completion: Result object the deleted record ID's or an error
+    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+        
+        fetchRecordsByUser { (result: Result<[T], Error>) in
+            
+            switch result {
+                
+            case .failure(let error):
+                completion(.failure(error))
+                
+            case .success(let values):
+                
+                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
+                    completion(.failure(StorageError.cloudKitNullRecord))
+                    return
+                }
+                
+                remove(storageType:storageType, recordIDs) {
+                    result in
+                    
+                    switch result {
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    case .success(let recordIDs):
+                        completion(.success(recordIDs))
+                    }
+                }
+            }
+        }
+    }
 }
