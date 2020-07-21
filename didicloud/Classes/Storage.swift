@@ -236,6 +236,34 @@ public struct Storage {
         }
     }
     
+    /// Removes multiple records from the database
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - recordIDs: The UUID's in the database
+    ///   - completion: Result object the deleted record ID's or an error
+    public static func remove(storageType: StorageType = .privateStorage, _ recordIDs: [CKRecord.ID], completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+        
+        let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
+        
+        operation.modifyRecordsCompletionBlock = {
+            (_, deletedRecordIDs, error) in
+            
+            if error != nil {
+                completion(.failure(StorageError.cloudKitDataRemoval))
+                return
+            }
+            
+            guard let recordIDs = deletedRecordIDs else {
+                completion(.failure(StorageError.cloudKitNullReturn))
+                return
+            }
+            
+            completion(.success(recordIDs))
+        }
+        
+        storageType.database.add(operation)
+    }
+    
     /// Removes all records of type T
     /// - Parameters:
     ///   - storageType: Which database to perform the query
