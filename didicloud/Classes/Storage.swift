@@ -308,7 +308,7 @@ public struct Storage {
     ///   - completion: Result object the deleted record ID's or an error
     public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
         
-        fetchRecordsByUser { (result: Result<[T], Error>) in
+        fetchRecordsByUser(storageType: storageType) { (result: Result<[T], Error>) in
             
             switch result {
                 
