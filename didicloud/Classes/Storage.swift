@@ -39,7 +39,7 @@ public struct Storage {
     
     /// Returns the current user icloud ID
     /// - Parameter completion: Result object containing the user icloud ID or an error
-    public static func getUserRecordID(_ completion: @escaping (Result<String, Error>) -> Void) {
+    public static func getUserRecordID(_ completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
         CKContainer.default().fetchUserRecordID { (result, error) in
             
             if error != nil {
@@ -52,7 +52,7 @@ public struct Storage {
                 return
             }
             
-            completion(.success(result.recordName))
+            completion(.success(result))
             
         }
     }
