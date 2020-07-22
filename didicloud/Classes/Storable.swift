@@ -21,5 +21,5 @@ public protocol Storable {
     static var reference: String { get }
     static var parser: Parser { get }
     
-    var recordID: CKRecord.ID? { get }
+    var recordName: String? { get }
 }

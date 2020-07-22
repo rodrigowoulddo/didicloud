@@ -19,7 +19,7 @@ public struct Storage {
     
     /// Returns the current user icloud ID
     /// - Parameter completion: Result object containing the user icloud ID or an error
-    public static func getUserRecordID(_ completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
+    public static func getUserRecordID(_ completion: @escaping (Result<String, Error>) -> Void) {
         CKContainer.default().fetchUserRecordID { (result, error) in
             
             if error != nil {
@@ -32,7 +32,7 @@ public struct Storage {
                 return
             }
             
-            completion(.success(result))
+            completion(.success(result.recordName))
             
         }
     }
@@ -122,8 +122,9 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordID: The UUID of the record in the database
     ///   - completion: Result object containing the fetched record or an error
-    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
+    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordName: String, _ completion: @escaping (Result<T, Error>) -> Void) {
                 
+        let recordID = CKRecord.ID(recordName: recordName)
         storageType.database.fetch(withRecordID: recordID) {
             result, error in
             
@@ -217,8 +218,9 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordID: The UUID of the record in the database
     ///   - completion: Result object the deleted record ID or an error
-    public static func remove(storageType: StorageType = .privateStorage, _ recordID: CKRecord.ID, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
+    public static func remove(storageType: StorageType = .privateStorage, _ recordName: String, completion: @escaping (Result<String, Error>) -> Void) {
                 
+        let recordID = CKRecord.ID(recordName: recordName)
         storageType.database.delete(withRecordID: recordID) {
             (recordID, error) in
             
@@ -232,7 +234,7 @@ public struct Storage {
                 return
             }
             
-            completion(.success(recordID))
+            completion(.success(recordID.recordName))
         }
     }
     
@@ -241,8 +243,9 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordIDs: The UUID's in the database
     ///   - completion: Result object the deleted record ID's or an error
-    public static func remove(storageType: StorageType = .privateStorage, _ recordIDs: [CKRecord.ID], completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+    public static func remove(storageType: StorageType = .privateStorage, _ recordNames: [String], completion: @escaping (Result<[String], Error>) -> Void) {
         
+        let recordIDs = recordNames.map({ CKRecord.ID(recordName: $0) })
         let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
         
         operation.modifyRecordsCompletionBlock = {
@@ -258,7 +261,7 @@ public struct Storage {
                 return
             }
             
-            completion(.success(recordIDs))
+            completion(.success(recordIDs.map({ $0.recordName })))
         }
         
         storageType.database.add(operation)
@@ -269,7 +272,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - type: The type of the record
     ///   - completion: Result object the deleted record ID's or an error
-    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
         
         getAll(storageType: storageType) { (result: Result<[T], Error>) in
             
@@ -280,12 +283,12 @@ public struct Storage {
                 
             case .success(let values):
                 
-                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
+                guard let recordNames = values.map({ $0.recordName }) as? [String] else {
                     completion(.failure(StorageError.cloudKitNullRecord))
                     return
                 }
-                
-                remove(storageType:storageType, recordIDs) {
+                                
+                remove(storageType:storageType, recordNames) {
                     result in
                     
                     switch result {
@@ -306,7 +309,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - type: The type of the record
     ///   - completion: Result object the deleted record ID's or an error
-    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
         
         fetchRecordsByUser(storageType: storageType) { (result: Result<[T], Error>) in
             
@@ -317,12 +320,12 @@ public struct Storage {
                 
             case .success(let values):
                 
-                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
+                guard let recordNames = values.map({ $0.recordName }) as? [String] else {
                     completion(.failure(StorageError.cloudKitNullRecord))
                     return
                 }
-                
-                remove(storageType:storageType, recordIDs) {
+                                
+                remove(storageType:storageType, recordNames) {
                     result in
                     
                     switch result {
