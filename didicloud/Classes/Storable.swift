@@ -23,3 +23,7 @@ public protocol Storable {
     
     var recordName: String? { get }
 }
+
+public protocol CodableStorable: Storable & Codable {
+    
+}
