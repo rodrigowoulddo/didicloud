@@ -43,12 +43,12 @@ public struct Storage {
         CKContainer.default().fetchUserRecordID { (result, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+                completion(.failure(StorageError.DDCDataRetrieval))
                 return
             }
             
             guard let result = result else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
@@ -75,19 +75,19 @@ public struct Storage {
                     results, error in
                     
                     if error != nil {
-                        completion(.failure(StorageError.cloudKitDataRetrieval))
+                        completion(.failure(StorageError.DDCDataRetrieval))
                         return
                     }
                     
                     guard let results = results else {
-                        completion(.failure(StorageError.cloudKitNullReturn))
+                        completion(.failure(StorageError.DDCNullReturn))
                         return
                     }
                     
                     var values: [T] = []
                     for record in results {
                         guard let value = try? T.parser.fromRecord(record) as? T else {
-                            completion(.failure(StorageError.parsingFailure))
+                            completion(.failure(StorageError.DDCParsingFailure))
                             return
                         }
                         values.append(value)
@@ -114,12 +114,12 @@ public struct Storage {
             results, error in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+                completion(.failure(StorageError.DDCDataRetrieval))
                 return
             }
             
             guard let results = results else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
@@ -127,7 +127,7 @@ public struct Storage {
             var values: [T] = []
             for record in results {
                 guard let value = try? T.parser.fromRecord(record) as? T else {
-                    completion(.failure(StorageError.parsingFailure))
+                    completion(.failure(StorageError.DDCParsingFailure))
                     return
                 }
                 values.append(value)
@@ -149,17 +149,17 @@ public struct Storage {
             result, error in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+                completion(.failure(StorageError.DDCDataRetrieval))
                 return
             }
             
             guard let record = result else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
             guard let value = try? T.parser.fromRecord(record) as? T else {
-                completion(.failure(StorageError.parsingFailure))
+                completion(.failure(StorageError.DDCParsingFailure))
                 return
             }
             
@@ -175,24 +175,24 @@ public struct Storage {
     public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
-            return completion(.failure(StorageError.parsingFailure))
+            return completion(.failure(StorageError.DDCParsingFailure))
         }
                 
         storageType.database.save(record) {
             (savedRecord, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataInsertion))
+                completion(.failure(StorageError.DDCDataInsertion))
                 return
             }
             
             guard let savedRecord = savedRecord else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
             guard let value = try? T.parser.fromRecord(savedRecord) as? T else {
-                completion(.failure(StorageError.parsingFailure))
+                completion(.failure(StorageError.DDCParsingFailure))
                 return
             }
             
@@ -208,7 +208,7 @@ public struct Storage {
     public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<String, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
-            completion(.failure(StorageError.parsingFailure))
+            completion(.failure(StorageError.DDCParsingFailure))
             return
         }
                 
@@ -219,12 +219,12 @@ public struct Storage {
             (updatedRecords, _, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataUpdate))
+                completion(.failure(StorageError.DDCDataUpdate))
                 return
             }
             
             guard let recordName = updatedRecords?.first?.recordID.recordName else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
@@ -246,12 +246,12 @@ public struct Storage {
             (recordID, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRemoval))
+                completion(.failure(StorageError.DDCDataRemoval))
                 return
             }
             
             guard let recordID = recordID else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
@@ -273,12 +273,12 @@ public struct Storage {
             (_, deletedRecordIDs, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRemoval))
+                completion(.failure(StorageError.DDCDataRemoval))
                 return
             }
             
             guard let recordIDs = deletedRecordIDs else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
@@ -305,7 +305,7 @@ public struct Storage {
             case .success(let values):
                 
                 guard let recordNames = values.map({ $0.recordName }) as? [String] else {
-                    completion(.failure(StorageError.cloudKitNullRecord))
+                    completion(.failure(StorageError.DDCNullRecord))
                     return
                 }
                                 
@@ -342,7 +342,7 @@ public struct Storage {
             case .success(let values):
                 
                 guard let recordNames = values.map({ $0.recordName }) as? [String] else {
-                    completion(.failure(StorageError.cloudKitNullRecord))
+                    completion(.failure(StorageError.DDCNullRecord))
                     return
                 }
                                 
