@@ -12,9 +12,29 @@ import CloudKit
 public struct Storage {
     
     private static let forbidenAttributes = ["id", "record"]
-
-    public static func newID() -> CKRecord.ID {
-        return CKRecord.ID(recordName: UUID().uuidString)
+    
+    /// Returns an CKRecordID for the given recordName
+    /// - Parameter completion: Result object containing the user icloud ID or an error
+    public static func id(from recordName: String) -> CKRecord.ID {
+        return CKRecord.ID(recordName: recordName)
+    }
+    
+    /// Returns a record for the passing Storable object. If the objects has a recordName, it will be preserved.
+    /// - Parameter storable: Result CKRecord object from the Storable Object
+    public static func record<T: Storable>(from storable: T) -> CKRecord {
+        
+        let record: CKRecord
+        
+        if let recordName = storable.recordName {
+            
+            record = CKRecord(recordType: T.reference, recordID: CKRecord.ID(recordName: recordName))
+            
+        } else {
+            
+            record = CKRecord(recordType: T.reference)
+        }
+        
+        return record
     }
     
     /// Returns the current user icloud ID
@@ -185,32 +205,33 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - storable: The Storable object to  e updated
     ///   - completion: Result object containing the updated record or an error
-    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<String, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
-            return completion(.failure(StorageError.parsingFailure))
+            completion(.failure(StorageError.parsingFailure))
+            return
         }
+                
+        let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
+        operation.savePolicy = .allKeys
         
-        storageType.database.save(record) {
-            (savedRecord, error) in
+        operation.modifyRecordsCompletionBlock = {
+            (updatedRecords, _, error) in
             
             if error != nil {
                 completion(.failure(StorageError.cloudKitDataUpdate))
                 return
             }
             
-            guard let savedRecord = savedRecord else {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+            guard let recordName = updatedRecords?.first?.recordID.recordName else {
+                completion(.failure(StorageError.cloudKitNullReturn))
                 return
             }
             
-            guard let value = try? T.parser.fromRecord(savedRecord) as? T else {
-                completion(.failure(StorageError.parsingFailure))
-                return
-            }
-            
-            completion(.success(value))
+            completion(.success(recordName))
         }
+        
+        storageType.database.add(operation)
     }
     
     /// Removes a record from the database

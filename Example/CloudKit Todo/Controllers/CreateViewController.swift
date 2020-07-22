@@ -63,7 +63,9 @@ class CreateViewController: UIViewController {
     
     private func updateTodo(_ todo: Todo, name: String, description: String?) {
         
-        let todoToUpdate = Todo(name: name, simpleDescription: description)
+        var todoToUpdate = todo
+        todoToUpdate.name = name
+        todoToUpdate.simpleDescription = description
         
         saveActivityIndicator.isHidden = false
         Storage.update(todoToUpdate) {
