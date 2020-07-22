@@ -10,25 +10,25 @@ import Foundation
 
 public enum StorageError: LocalizedError {
         
-    case cloudKitDataRetrieval
-    case cloudKitDataInsertion
-    case cloudKitDataRemoval
-    case cloudKitDataUpdate
-    case cloudKitNullReference
-    case cloudKitNullRecord
-    case cloudKitNullReturn
-    case parsingFailure
+    case DDCDataRetrieval
+    case DDCDataInsertion
+    case DDCDataRemoval
+    case DDCDataUpdate
+    case DDCNullReference
+    case DDCNullRecord
+    case DDCNullReturn
+    case DDCParsingFailure
 
     public var errorDescription: String? {
         switch self {
-        case .cloudKitDataRetrieval: return NSLocalizedString("Could not retrieve data from storage.", comment: "Error")
-        case .cloudKitDataInsertion: return NSLocalizedString("Could not insert data into storage.", comment: "Error")
-        case .cloudKitDataRemoval: return NSLocalizedString("Could not remove data from storage.", comment: "Error")
-        case .cloudKitDataUpdate: return NSLocalizedString("Could not update data from storage.", comment: "Error")
-        case .cloudKitNullReference: return NSLocalizedString("Could not work with a null resource ID.", comment: "Error")
-        case .cloudKitNullRecord: return NSLocalizedString("Could not work with a null record.", comment: "Error")
-        case .cloudKitNullReturn: return NSLocalizedString("Storage returned null for the operation.", comment: "Error")
-        case .parsingFailure: return NSLocalizedString("Could not parse CKRecord to object.", comment: "Error")
+        case .DDCDataRetrieval: return NSLocalizedString("Could not retrieve data from storage.", comment: "Error")
+        case .DDCDataInsertion: return NSLocalizedString("Could not insert data into storage.", comment: "Error")
+        case .DDCDataRemoval: return NSLocalizedString("Could not remove data from storage.", comment: "Error")
+        case .DDCDataUpdate: return NSLocalizedString("Could not update data from storage.", comment: "Error")
+        case .DDCNullReference: return NSLocalizedString("Could not work with a null resource ID.", comment: "Error")
+        case .DDCNullRecord: return NSLocalizedString("Could not work with a null record.", comment: "Error")
+        case .DDCNullReturn: return NSLocalizedString("Storage returned null for the operation.", comment: "Error")
+        case .DDCParsingFailure: return NSLocalizedString("Could not parse CKRecord to object.", comment: "Error")
         }
     }
 }

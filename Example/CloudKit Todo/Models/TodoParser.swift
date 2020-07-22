@@ -14,21 +14,22 @@ class TodoParser: Parser {
     
     func fromRecord(_ record: CKRecord) throws -> Storable {
         
-        let recordID = record.recordID
+        let recordName = record.recordID.recordName
         
         guard
           let name = record["name"] as? String,
           let simpleDescription = record["simpleDescription"] as? String
-        else { throw ParsingError.DDCParsingEError}
+        else { throw ParsingError.DDCParsingError}
         
-        let todo = Todo(recordID: recordID, name: name, simpleDescription: simpleDescription)
+        let todo = Todo(recordName: recordName, name: name, simpleDescription: simpleDescription)
         return todo
     }
     
     func toRecord(_ storable: Storable) throws -> CKRecord {
         
-        guard let todo = storable as? Todo else { throw ParsingError.DDCParsingEError }
-        let record = CKRecord(recordType: Todo.reference)
+        guard let todo = storable as? Todo else { throw ParsingError.DDCParsingError }
+        
+        let record = Storage.record(from: todo)
         
         record.setValue(todo.name, forKey: "name")
         record.setValue(todo.simpleDescription, forKey: "simpleDescription")

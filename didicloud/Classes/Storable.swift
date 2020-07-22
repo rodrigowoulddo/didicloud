@@ -6,20 +6,16 @@
 //  Copyright © 2020 Rodrigo Giglio. All rights reserved.
 //
 
-import Foundation
 import CloudKit
-
-public protocol Parser {
-    func fromRecord(_ record: CKRecord) throws -> Storable
-    func toRecord(_ storable: Storable) throws -> CKRecord
-}
-
-public enum ParsingError: Error { case DDCParsingEError }
 
 public protocol Storable {
     
     static var reference: String { get }
     static var parser: Parser { get }
     
-    var recordID: CKRecord.ID? { get }
+    var recordName: String? { get }
+}
+
+public protocol CodableStorable: Storable & Codable {
+    
 }

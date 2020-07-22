@@ -12,27 +12,47 @@ import CloudKit
 public struct Storage {
     
     private static let forbidenAttributes = ["id", "record"]
-
-    public static func newID() -> CKRecord.ID {
-        return CKRecord.ID(recordName: UUID().uuidString)
+    
+    /// Returns an CKRecordID for the given recordName
+    /// - Parameter completion: Result object containing the user icloud ID or an error
+    public static func id(from recordName: String) -> CKRecord.ID {
+        return CKRecord.ID(recordName: recordName)
+    }
+    
+    /// Returns a record for the passing Storable object. If the objects has a recordName, it will be preserved.
+    /// - Parameter storable: Result CKRecord object from the Storable Object
+    public static func record<T: Storable>(from storable: T) -> CKRecord {
+        
+        let record: CKRecord
+        
+        if let recordName = storable.recordName {
+            
+            record = CKRecord(recordType: T.reference, recordID: CKRecord.ID(recordName: recordName))
+            
+        } else {
+            
+            record = CKRecord(recordType: T.reference)
+        }
+        
+        return record
     }
     
     /// Returns the current user icloud ID
     /// - Parameter completion: Result object containing the user icloud ID or an error
-    public static func getUserRecordID(_ completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
+    public static func getUserRecordID(_ completion: @escaping (Result<String, Error>) -> Void) {
         CKContainer.default().fetchUserRecordID { (result, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+                completion(.failure(StorageError.DDCDataRetrieval))
                 return
             }
             
             guard let result = result else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
-            completion(.success(result))
+            completion(.success(result.recordName))
             
         }
     }
@@ -55,19 +75,19 @@ public struct Storage {
                     results, error in
                     
                     if error != nil {
-                        completion(.failure(StorageError.cloudKitDataRetrieval))
+                        completion(.failure(StorageError.DDCDataRetrieval))
                         return
                     }
                     
                     guard let results = results else {
-                        completion(.failure(StorageError.cloudKitNullReturn))
+                        completion(.failure(StorageError.DDCNullReturn))
                         return
                     }
                     
                     var values: [T] = []
                     for record in results {
                         guard let value = try? T.parser.fromRecord(record) as? T else {
-                            completion(.failure(StorageError.parsingFailure))
+                            completion(.failure(StorageError.DDCParsingFailure))
                             return
                         }
                         values.append(value)
@@ -94,12 +114,12 @@ public struct Storage {
             results, error in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+                completion(.failure(StorageError.DDCDataRetrieval))
                 return
             }
             
             guard let results = results else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
@@ -107,7 +127,7 @@ public struct Storage {
             var values: [T] = []
             for record in results {
                 guard let value = try? T.parser.fromRecord(record) as? T else {
-                    completion(.failure(StorageError.parsingFailure))
+                    completion(.failure(StorageError.DDCParsingFailure))
                     return
                 }
                 values.append(value)
@@ -122,23 +142,24 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordID: The UUID of the record in the database
     ///   - completion: Result object containing the fetched record or an error
-    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordID: CKRecord.ID, _ completion: @escaping (Result<T, Error>) -> Void) {
+    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordName: String, _ completion: @escaping (Result<T, Error>) -> Void) {
                 
+        let recordID = CKRecord.ID(recordName: recordName)
         storageType.database.fetch(withRecordID: recordID) {
             result, error in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+                completion(.failure(StorageError.DDCDataRetrieval))
                 return
             }
             
             guard let record = result else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
             guard let value = try? T.parser.fromRecord(record) as? T else {
-                completion(.failure(StorageError.parsingFailure))
+                completion(.failure(StorageError.DDCParsingFailure))
                 return
             }
             
@@ -154,24 +175,24 @@ public struct Storage {
     public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
-            return completion(.failure(StorageError.parsingFailure))
+            return completion(.failure(StorageError.DDCParsingFailure))
         }
                 
         storageType.database.save(record) {
             (savedRecord, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataInsertion))
+                completion(.failure(StorageError.DDCDataInsertion))
                 return
             }
             
             guard let savedRecord = savedRecord else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
             guard let value = try? T.parser.fromRecord(savedRecord) as? T else {
-                completion(.failure(StorageError.parsingFailure))
+                completion(.failure(StorageError.DDCParsingFailure))
                 return
             }
             
@@ -184,32 +205,33 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - storable: The Storable object to  e updated
     ///   - completion: Result object containing the updated record or an error
-    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<String, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
-            return completion(.failure(StorageError.parsingFailure))
+            completion(.failure(StorageError.DDCParsingFailure))
+            return
         }
+                
+        let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
+        operation.savePolicy = .allKeys
         
-        storageType.database.save(record) {
-            (savedRecord, error) in
+        operation.modifyRecordsCompletionBlock = {
+            (updatedRecords, _, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataUpdate))
+                completion(.failure(StorageError.DDCDataUpdate))
                 return
             }
             
-            guard let savedRecord = savedRecord else {
-                completion(.failure(StorageError.cloudKitDataRetrieval))
+            guard let recordName = updatedRecords?.first?.recordID.recordName else {
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
-            guard let value = try? T.parser.fromRecord(savedRecord) as? T else {
-                completion(.failure(StorageError.parsingFailure))
-                return
-            }
-            
-            completion(.success(value))
+            completion(.success(recordName))
         }
+        
+        storageType.database.add(operation)
     }
     
     /// Removes a record from the database
@@ -217,22 +239,23 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordID: The UUID of the record in the database
     ///   - completion: Result object the deleted record ID or an error
-    public static func remove(storageType: StorageType = .privateStorage, _ recordID: CKRecord.ID, completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
+    public static func remove(storageType: StorageType = .privateStorage, _ recordName: String, completion: @escaping (Result<String, Error>) -> Void) {
                 
+        let recordID = CKRecord.ID(recordName: recordName)
         storageType.database.delete(withRecordID: recordID) {
             (recordID, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRemoval))
+                completion(.failure(StorageError.DDCDataRemoval))
                 return
             }
             
             guard let recordID = recordID else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
-            completion(.success(recordID))
+            completion(.success(recordID.recordName))
         }
     }
     
@@ -241,24 +264,25 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordIDs: The UUID's in the database
     ///   - completion: Result object the deleted record ID's or an error
-    public static func remove(storageType: StorageType = .privateStorage, _ recordIDs: [CKRecord.ID], completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+    public static func remove(storageType: StorageType = .privateStorage, _ recordNames: [String], completion: @escaping (Result<[String], Error>) -> Void) {
         
+        let recordIDs = recordNames.map({ CKRecord.ID(recordName: $0) })
         let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
         
         operation.modifyRecordsCompletionBlock = {
             (_, deletedRecordIDs, error) in
             
             if error != nil {
-                completion(.failure(StorageError.cloudKitDataRemoval))
+                completion(.failure(StorageError.DDCDataRemoval))
                 return
             }
             
             guard let recordIDs = deletedRecordIDs else {
-                completion(.failure(StorageError.cloudKitNullReturn))
+                completion(.failure(StorageError.DDCNullReturn))
                 return
             }
             
-            completion(.success(recordIDs))
+            completion(.success(recordIDs.map({ $0.recordName })))
         }
         
         storageType.database.add(operation)
@@ -269,7 +293,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - type: The type of the record
     ///   - completion: Result object the deleted record ID's or an error
-    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
         
         getAll(storageType: storageType) { (result: Result<[T], Error>) in
             
@@ -280,12 +304,12 @@ public struct Storage {
                 
             case .success(let values):
                 
-                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
-                    completion(.failure(StorageError.cloudKitNullRecord))
+                guard let recordNames = values.map({ $0.recordName }) as? [String] else {
+                    completion(.failure(StorageError.DDCNullRecord))
                     return
                 }
-                
-                remove(storageType:storageType, recordIDs) {
+                                
+                remove(storageType:storageType, recordNames) {
                     result in
                     
                     switch result {
@@ -306,7 +330,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - type: The type of the record
     ///   - completion: Result object the deleted record ID's or an error
-    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[CKRecord.ID], Error>) -> Void) {
+    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
         
         fetchRecordsByUser(storageType: storageType) { (result: Result<[T], Error>) in
             
@@ -317,12 +341,12 @@ public struct Storage {
                 
             case .success(let values):
                 
-                guard let recordIDs = values.map({ $0.recordID }) as? [CKRecord.ID] else {
-                    completion(.failure(StorageError.cloudKitNullRecord))
+                guard let recordNames = values.map({ $0.recordName }) as? [String] else {
+                    completion(.failure(StorageError.DDCNullRecord))
                     return
                 }
-                
-                remove(storageType:storageType, recordIDs) {
+                                
+                remove(storageType:storageType, recordNames) {
                     result in
                     
                     switch result {

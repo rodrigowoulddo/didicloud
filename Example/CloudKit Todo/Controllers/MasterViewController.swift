@@ -62,7 +62,7 @@ class MasterViewController: UITableViewController {
         }
     }
     
-    private func completeTodo(withId id: CKRecord.ID) {
+    private func completeTodo(withId id: String) {
         
         Storage.remove(id) {
             result in
@@ -121,8 +121,8 @@ class MasterViewController: UITableViewController {
         let complete = UIContextualAction(style: .normal, title: "Complete", handler: {
             (action, view, completionHandler) in
             
-            guard let id = self.todos[indexPath.row].recordID else { return }
-            self.todos = self.todos.filter({ $0.recordID != id })
+            guard let id = self.todos[indexPath.row].recordName else { return }
+            self.todos = self.todos.filter({ $0.recordName != id })
             
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
             self.completeTodo(withId: id)
