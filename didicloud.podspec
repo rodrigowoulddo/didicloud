@@ -31,6 +31,8 @@ didicloud is an abstraction for CloudKit that make CRUD operations easier and le
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '13.0'
+  s.watchos.deployment_target = '6.0'
+
 
   s.source_files = 'didicloud/Classes/**/*'
   
