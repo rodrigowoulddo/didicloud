@@ -39,8 +39,13 @@ public struct Storage {
     
     /// Returns the current user icloud ID
     /// - Parameter completion: Result object containing the user icloud ID or an error
-    public static func getUserRecordID(_ completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
-        CKContainer.default().fetchUserRecordID { (result, error) in
+    public static func getUserRecordID(customContainer: String? = nil, _ completion: @escaping (Result<CKRecord.ID, Error>) -> Void) {
+        
+        let container: CKContainer
+        if let customContainer = customContainer { container = CKContainer(identifier: customContainer) }
+        else { container = CKContainer.default() }
+        
+        container.fetchUserRecordID { (result, error) in
             
             if error != nil {
                 completion(.failure(StorageError.DDCDataRetrieval))
@@ -61,7 +66,7 @@ public struct Storage {
     /// - Parameters:
     ///   - storageType: Which database to perform the query
     ///   - completion: Result object containing all fetched records or an error
-    public static func fetchRecordsByUser<T: Storable>(storageType: StorageType = .privateStorage, _ completion: @escaping (Result<[T], Error>) -> Void) {
+    public static func fetchRecordsByUser<T: Storable>(storageType: StorageType = .privateStorage(), _ completion: @escaping (Result<[T], Error>) -> Void) {
         
         getUserRecordID { (result) in
             switch result {
@@ -106,7 +111,7 @@ public struct Storage {
     /// - Parameters:
     ///   - storageType: Which database to perform the query
     ///   - completion: Result object containing all fetched records or an error
-    public static func getAll<T: Storable>(storageType: StorageType = .privateStorage, _ completion: @escaping (Result<[T], Error>) -> Void) {
+    public static func getAll<T: Storable>(storageType: StorageType = .privateStorage(), _ completion: @escaping (Result<[T], Error>) -> Void) {
         
         let query = CKQuery(recordType: T.reference, predicate: NSPredicate(value: true))
         
@@ -142,7 +147,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordID: The UUID of the record in the database
     ///   - completion: Result object containing the fetched record or an error
-    public static func get<T: Storable>(storageType: StorageType = .privateStorage, recordName: String, _ completion: @escaping (Result<T, Error>) -> Void) {
+    public static func get<T: Storable>(storageType: StorageType = .privateStorage(), recordName: String, _ completion: @escaping (Result<T, Error>) -> Void) {
                 
         let recordID = CKRecord.ID(recordName: recordName)
         storageType.database.fetch(withRecordID: recordID) {
@@ -172,7 +177,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - storable: The Storable object to  e inserted
     ///   - completion: Result object containing the created record  or an error
-    public static func create<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
+    public static func create<T: Storable>(storageType: StorageType = .privateStorage(), _ storable: T, _  completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
             return completion(.failure(StorageError.DDCParsingFailure))
@@ -205,7 +210,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - storable: The Storable object to  e updated
     ///   - completion: Result object containing the updated record or an error
-    public static func update<T: Storable>(storageType: StorageType = .privateStorage, _ storable: T, _  completion: @escaping (Result<String, Error>) -> Void) {
+    public static func update<T: Storable>(storageType: StorageType = .privateStorage(), _ storable: T, _  completion: @escaping (Result<String, Error>) -> Void) {
         
         guard let record = try? T.parser.toRecord(storable) else {
             completion(.failure(StorageError.DDCParsingFailure))
@@ -239,7 +244,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordID: The UUID of the record in the database
     ///   - completion: Result object the deleted record ID or an error
-    public static func remove(storageType: StorageType = .privateStorage, _ recordName: String, completion: @escaping (Result<String, Error>) -> Void) {
+    public static func remove(storageType: StorageType = .privateStorage(), _ recordName: String, completion: @escaping (Result<String, Error>) -> Void) {
                 
         let recordID = CKRecord.ID(recordName: recordName)
         storageType.database.delete(withRecordID: recordID) {
@@ -264,7 +269,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - recordIDs: The UUID's in the database
     ///   - completion: Result object the deleted record ID's or an error
-    public static func remove(storageType: StorageType = .privateStorage, _ recordNames: [String], completion: @escaping (Result<[String], Error>) -> Void) {
+    public static func remove(storageType: StorageType = .privateStorage(), _ recordNames: [String], completion: @escaping (Result<[String], Error>) -> Void) {
         
         let recordIDs = recordNames.map({ CKRecord.ID(recordName: $0) })
         let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
@@ -293,7 +298,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - type: The type of the record
     ///   - completion: Result object the deleted record ID's or an error
-    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
+    public static func removeAll<T: Storable>(storageType: StorageType = .privateStorage(), type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
         
         getAll(storageType: storageType) { (result: Result<[T], Error>) in
             
@@ -330,7 +335,7 @@ public struct Storage {
     ///   - storageType: Which database to perform the query
     ///   - type: The type of the record
     ///   - completion: Result object the deleted record ID's or an error
-    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage, type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
+    public static func removeAllbyUser<T: Storable>(storageType: StorageType = .privateStorage(), type: T.Type, completion: @escaping (Result<[String], Error>) -> Void) {
         
         fetchRecordsByUser(storageType: storageType) { (result: Result<[T], Error>) in
             

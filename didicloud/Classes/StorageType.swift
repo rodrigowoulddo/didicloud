@@ -8,13 +8,34 @@
 import CloudKit
 
 public enum StorageType {
-    case publicStorage
-    case privateStorage
+    case publicStorage(customContainer: String? = nil)
+    case privateStorage(customContainer: String? = nil)
     
     var database: CKDatabase {
         switch self {
-            case .publicStorage: return CKContainer.default().publicCloudDatabase
-            case .privateStorage: return CKContainer.default().privateCloudDatabase
+        case .publicStorage(let customContainer):
+            
+            if let customContainer = customContainer {
+                
+                return CKContainer(identifier: customContainer).publicCloudDatabase
+                
+            } else {
+                
+                return CKContainer.default().publicCloudDatabase
+                
+            }
+        case .privateStorage(let customContainer):
+
+
+            if let customContainer = customContainer {
+                
+                return CKContainer(identifier: customContainer).privateCloudDatabase
+                
+            } else {
+                
+                return CKContainer.default().privateCloudDatabase
+                
+            }
         }
     }
 }
