@@ -68,7 +68,7 @@ public struct Storage {
     ///   - completion: Result object containing all fetched records or an error
     public static func fetchRecordsByUser<T: Storable>(storageType: StorageType = .privateStorage(), _ completion: @escaping (Result<[T], Error>) -> Void) {
         
-        getUserRecordID { (result) in
+        getUserRecordID(customContainer: storageType.container) { (result) in
             switch result {
             case .success(let recordID):
                 let query = CKQuery(

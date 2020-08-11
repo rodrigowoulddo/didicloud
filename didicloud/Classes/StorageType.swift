@@ -11,6 +11,17 @@ public enum StorageType {
     case publicStorage(customContainer: String? = nil)
     case privateStorage(customContainer: String? = nil)
     
+    var container: String? {
+        
+        switch self  {
+        case
+        .publicStorage(let customContainer),
+        .privateStorage(let customContainer):
+            
+            return customContainer
+        }
+    }
+    
     var database: CKDatabase {
         switch self {
         case .publicStorage(let customContainer):
