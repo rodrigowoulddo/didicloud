@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'didicloud'
-  s.version          = '0.2.9'
+  s.version          = '0.2.10'
   s.summary          = 'An abstraction for CloudKit operations'
 
   s.swift_versions   = '5.0'
