@@ -107,6 +107,44 @@ public struct Storage {
         }
     }
     
+    /// Fetch records using a predicate String
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - completion: Result object containing all fetched records or an error
+    ///   - predicate: Predicate string
+    public static func get<T: Storable>(storageType: StorageType = .privateStorage(), predicate: NSPredicate,  _ completion: @escaping (Result<[T], Error>) -> Void) {
+        
+        let query = CKQuery(
+            recordType: T.reference,
+            predicate: predicate
+        )
+        
+        storageType.database.perform(query, inZoneWith: nil) {
+            results, error in
+            
+            if error != nil {
+                completion(.failure(StorageError.DDCDataRetrieval))
+                return
+            }
+            
+            guard let results = results else {
+                completion(.failure(StorageError.DDCNullReturn))
+                return
+            }
+            
+            var values: [T] = []
+            for record in results {
+                guard let value = try? T.parser.fromRecord(record) as? T else {
+                    completion(.failure(StorageError.DDCParsingFailure))
+                    return
+                }
+                values.append(value)
+            }
+            
+            completion(.success(values))
+        }
+    }
+    
     /// Fetch all records of T
     /// - Parameters:
     ///   - storageType: Which database to perform the query
@@ -363,6 +401,46 @@ public struct Storage {
                         completion(.success(recordIDs))
                     }
                 }
+            }
+        }
+    }
+    
+    /// Remove records using a predicate String
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - completion: Result object containing all deleted record ID's or an error
+    ///   - predicate: Predicate string
+    public static func remove<T: Storable>(storageType: StorageType = .privateStorage(), type: T.Type, predicate: NSPredicate,  _ completion: @escaping (Result<[String], Error>) -> Void) {
+        
+        Storage.get(storageType: storageType, predicate: predicate) {
+            (result: Result<[T], Error>) in
+            
+            switch result {
+                
+            case.failure(let error):
+                completion(.failure(error))
+                
+            case .success(let values):
+                
+                guard let recordNames = values.map({ $0.recordName }) as? [String] else {
+                    completion(.failure(StorageError.DDCNullRecord))
+                    return
+                }
+                                
+                remove(storageType:storageType, recordNames) {
+                    result in
+                    
+                    switch result {
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    case .success(let recordIDs):
+                        completion(.success(recordIDs))
+                    }
+                }
+                
+                completion(.success(recordNames))
             }
         }
     }
