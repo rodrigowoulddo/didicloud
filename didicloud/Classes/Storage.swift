@@ -202,7 +202,7 @@ public struct Storage {
         // Have another closure for when the download is complete
         queryOperation.queryCompletionBlock = { cursor, error in
             if error != nil {
-                completion(.failure(StorageError.DDCDataRetrieval))
+                completionHandler(.failure(StorageError.DDCDataRetrieval))
             } else {
                 completionHandler(.success(listOfRecords))
             }
