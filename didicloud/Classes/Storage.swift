@@ -180,6 +180,37 @@ public struct Storage {
         }
     }
     
+    /// Fetch all records of T - without CloudKit default results limitation
+    /// - Parameters:
+    ///   - storageType: Which database to perform the query
+    ///   - completion: Result object containing all fetched records or an error
+    public static func getAllWithoutLimit<T: Storable>(storageType: StorageType = .privateStorage(), _ completionHandler: @escaping (Result<[T], Error>) -> Void) {
+        var listOfRecords: [T] = [] // A place to store the items as we get them
+        
+        let query = CKQuery(recordType: T.reference, predicate: NSPredicate(value: true))
+        let queryOperation = CKQueryOperation(query: query)
+        
+        // As we get each record, lets store them in the array
+        queryOperation.recordFetchedBlock = { record in
+            guard let value = try? T.parser.fromRecord(record) as? T else {
+                completionHandler(.failure(StorageError.DDCParsingFailure))
+                return
+            }
+            listOfRecords.append(value)
+        }
+        
+        // Have another closure for when the download is complete
+        queryOperation.queryCompletionBlock = { cursor, error in
+            if error != nil {
+                completionHandler(.failure(StorageError.DDCDataRetrieval))
+            } else {
+                completionHandler(.success(listOfRecords))
+            }
+        }
+        
+        storageType.database.add(queryOperation)
+    }
+    
     /// Fetch the record with the ID
     /// - Parameters:
     ///   - storageType: Which database to perform the query
