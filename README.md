@@ -6,7 +6,7 @@
 
 didcloud makes CloudKit operations easier and less verbose.
 
-## **[OUTDATED]**
+⚠️ This documentation is a work in progress. It may not cover some of didicloud's features.
 
 ## Examples
 
